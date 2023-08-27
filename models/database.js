@@ -50,7 +50,14 @@ const budgetSchema= new mongoose.Schema({
         sum:{
             type:Number,
             required:true,
-        }},
+        },
+    id:{
+        type:String,
+        unique:true,
+        default:()=>{
+            return crypto.randomUUID();
+        },
+    }},
     {versionKey: false}
 );
 

@@ -62,18 +62,20 @@ app.get('/budget',authenticateToken,async (req, res) => {
   let resultComputed;
   let q = req.url.split('?'), result = {};
   splitUrl(q,result);
-  if(req.user.id!=result.user_id)
-  {
-    return res.status(401).json('Id doesnt match the user');
+  try {
+    if (req.user.id != result.user_id) {
+      return res.status(401).json('Id doesnt match the user');
+    }
+    if (result.category) {
+      resultComputed = await Budget.find({user_id: result.user_id, category: result.category});
+    } else {
+      resultComputed = await Budget.find({user_id: result.user_id});
+    }
+    return resultComputed[0] === undefined ? res.json('this user does not have budget') : res.json(resultComputed);
   }
-  if(result.category)
-  {
-    resultComputed=await Budget.find({user_id: result.user_id,category:result.category});
+  catch (e) {
+    res.json(e.message)
   }
-  else{
-    resultComputed=await Budget.find({user_id: result.user_id});
-  }
-  return resultComputed[0] === undefined ? res.json('this user does not have budget') : res.json(resultComputed);
 })
 
 app.post('/addCost',authenticateToken,async (req, res) => {
@@ -97,6 +99,24 @@ app.post('/addCost',authenticateToken,async (req, res) => {
   }
 })
 
+app.delete('/removeCost',authenticateToken,async (req, res) => {
+  if(req.user.id!=req.body.user_id)
+  {
+    return res.status(401).json('Id doesnt match the user');
+  }
+  try{
+    const cost=await Budget.find({id:req.body.cost_id});
+    console.log(cost.length==0)
+    {
+      throw Error('cost with this id doesnt exist');
+    }
+    cost.deleteOne();
+    res.json('Successfully deleted cost');
+  }
+  catch (e) {
+    res.json(e.message);
+  }
+})
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
