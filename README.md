@@ -45,7 +45,7 @@ Endpoint: POST /addCost
 Request Body:
 ```json
 {
-    "user_id": "2",
+    "user_id": "1",
     "description": "see a movie",
     "category": "other",
     "sum": "5"
