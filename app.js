@@ -105,8 +105,9 @@ app.delete('/removeCost',authenticateToken,async (req, res) => {
     return res.status(401).json('Id doesnt match the user');
   }
   try{
+    await Budget.find({id:req.body.cost_id});
     const cost=await Budget.find({id:req.body.cost_id});
-    console.log(cost.length==0)
+    if(cost.length==0)
     {
       throw Error('cost with this id doesnt exist');
     }
@@ -117,6 +118,29 @@ app.delete('/removeCost',authenticateToken,async (req, res) => {
     res.json(e.message);
   }
 })
+
+app.post('/updateCost',authenticateToken,async (req, res) => {
+
+  if(req.user.id!=req.body.user_id)
+  {
+    return res.status(401).json('Id doesnt match the user');
+  }
+  try{
+    const update=await Budget.updateOne(
+        { id:req.body.cost_id}, // The filter to match the document you want to update
+        { $set: { sum: req.body.sum } }            // The update operation to perform
+    );
+    if(update.modifiedCount==0){
+      throw Error('cost with this id doesnt exist');
+    }
+    res.json('Successfully updated cost');
+  }
+  catch (e) {
+    res.json(e.message);
+  }
+})
+
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
