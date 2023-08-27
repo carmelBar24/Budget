@@ -59,14 +59,21 @@ app.post('/register',async (req, res) => {
 })
 
 app.get('/budget',authenticateToken,async (req, res) => {
+  let resultComputed;
   let q = req.url.split('?'), result = {};
   splitUrl(q,result);
   if(req.user.id!=result.user_id)
   {
     return res.status(401).json('Id doesnt match the user');
   }
-  let resultComputed = await Budget.find({user_id: result.user_id});
-  res.json(resultComputed);
+  if(result.category)
+  {
+    resultComputed=await Budget.find({user_id: result.user_id,category:result.category});
+  }
+  else{
+    resultComputed=await Budget.find({user_id: result.user_id});
+  }
+  return resultComputed[0] === undefined ? res.json('this user does not have budget') : res.json(resultComputed);
 })
 
 app.post('/addCost',authenticateToken,async (req, res) => {
