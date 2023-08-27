@@ -14,7 +14,16 @@ db.once('open', () => {
     console.log('Successfully connected to MongoDB Atlas.');
 });
 
-// Creating schemas for the User
+enumCategory=[
+    'food',
+    'housing',
+    'health',
+    'sport',
+    'education',
+    'transportation',
+    'other',]
+
+// Creating schemas
 const usersSchema= new mongoose.Schema(
     {
         id:String,
@@ -24,7 +33,28 @@ const usersSchema= new mongoose.Schema(
     {versionKey: false}
 );
 
+const budgetSchema= new mongoose.Schema({
+        user_id:{
+            type:Number,
+            required:true,
+        },
+        description:{
+            type:String,
+            required:true,
+        },
+        category:{
+            type:String,
+            enum:enumCategory,
+            required:true,
+        },
+        sum:{
+            type:Number,
+            required:true,
+        }},
+    {versionKey: false}
+);
 
 const User=mongoose.model('User',usersSchema);
+const Budget=mongoose.model('Budget',budgetSchema);
 
-module.exports={User};
+module.exports={User,Budget};
