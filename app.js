@@ -1,3 +1,4 @@
+// Import required modules
 require('dotenv').config()
 var createError = require('http-errors');
 var express = require('express');
@@ -7,12 +8,13 @@ var logger = require('morgan');
 const jwt=require('jsonwebtoken');
 const bcrypt=require('bcrypt');
 
+// Import routes and database models
 var indexRouter = require('./routes/index');
 const {User,Budget}= require("./models/database");
 
 var app = express();
 
-// view engine setup
+// Configure view engine and middleware
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -22,30 +24,35 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Use the index router
 app.use('/', indexRouter);
 
+// Handle user login
 app.post('/login',async (req, res) => {
+  // Check if the user exists
   const existUser = await User.findOne({id: req.body.id, username: req.body.username});
   if(existUser==null)
   {
-    return res.status(401).json('Could not Login');
+    return res.status(401).json("Login failed. There seems to be an issue with the username or ID.");
   }
   else{
-    console.log(existUser);
+    // Compare passwords
     if(bcrypt.compareSync(req.body.password,existUser.password))
     {
+      // Create and send an access token
       const user = {name: req.body.username,id:req.body.id};
       const access_token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
       return res.json({access_token: access_token})
     }
     else{
-      return res.json('Passwords are not match')
+      return res.json("Password does not match the user's credentials.")
     }
   }
 })
 
+// Handle user registration
 app.post('/register',async (req, res) => {
-
+  // Hash the password and create a new user
   let user_salt=bcrypt.genSaltSync(12);
   let hash_pass=bcrypt.hashSync(req.body.password,user_salt);
   const user=new User({
@@ -54,11 +61,15 @@ app.post('/register',async (req, res) => {
     password:hash_pass,
   });
   const newUser = await User.create(user);
-  return res.json(`user ${req.body.username} added successfully, please login`)
+  return res.json(`${req.body.username} has been successfully added. Please proceed to log in.`)
 
 })
 
+// Handle budget retrieval
 app.get('/budget',authenticateToken,async (req, res) => {
+  // Retrieve budget data based on user ID and category if provided
+  // Handle different cases for matching user ID and other errors
+  // Return appropriate responses
   let resultComputed;
   let q = req.url.split('?'), result = {};
   splitUrl(q,result);
@@ -78,11 +89,13 @@ app.get('/budget',authenticateToken,async (req, res) => {
   }
 })
 
+// Handle adding a cost entry
 app.post('/addCost',authenticateToken,async (req, res) => {
-
+  // Check if the provided user ID matches
+  // Create a new budget entry and send a success response
   if(req.user.id!=req.body.user_id)
   {
-    return res.status(401).json('Id doesnt match the user');
+    return res.status(401).json("The provided ID does not correspond to the user.");
   }
   try{
     const cost = new Budget({
@@ -99,17 +112,21 @@ app.post('/addCost',authenticateToken,async (req, res) => {
   }
 })
 
+// Handle removing a cost entry
 app.delete('/removeCost',authenticateToken,async (req, res) => {
+  // Check if the provided user ID matches
+  // Find and delete the cost entry based on the provided cost ID
+  // Handle not found or other errors
   if(req.user.id!=req.body.user_id)
   {
-    return res.status(401).json('Id doesnt match the user');
+    return res.status(401).json("The provided ID does not correspond to the user.");
   }
   try{
     await Budget.find({id:req.body.cost_id});
     const cost=await Budget.find({id:req.body.cost_id});
     if(cost.length==0)
     {
-      throw Error('cost with this id doesnt exist');
+      throw Error("No cost found with the provided ID.");
     }
     cost.deleteOne();
     res.json('Successfully deleted cost');
@@ -119,11 +136,14 @@ app.delete('/removeCost',authenticateToken,async (req, res) => {
   }
 })
 
+// Handle updating a cost entry
 app.post('/updateCost',authenticateToken,async (req, res) => {
-
+  // Check if the provided user ID matches
+  // Update the sum of the specified cost entry
+  // Handle no modification or other errors
   if(req.user.id!=req.body.user_id)
   {
-    return res.status(401).json('Id doesnt match the user');
+    return res.status(401).json("The provided ID does not correspond to the user.");
   }
   try{
     const update=await Budget.updateOne(
@@ -131,7 +151,7 @@ app.post('/updateCost',authenticateToken,async (req, res) => {
         { $set: { sum: req.body.sum } }            // The update operation to perform
     );
     if(update.modifiedCount==0){
-      throw Error('cost with this id doesnt exist');
+      throw Error("No cost found with the provided ID.");
     }
     res.json('Successfully updated cost');
   }
@@ -141,12 +161,12 @@ app.post('/updateCost',authenticateToken,async (req, res) => {
 })
 
 
-// catch 404 and forward to error handler
+// Error handling for 404 and other errors
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
+// Error handling middleware
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
@@ -157,7 +177,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-
+// Function to split URL parameters
 function splitUrl(url,result) {
   if (url.length >= 2) {
     // Split the URL by '&' and add each parameter to the result object
@@ -171,6 +191,7 @@ function splitUrl(url,result) {
   }
 }
 
+// Middleware to authenticate JWT tokens
 function authenticateToken(req,res,next) {
   const authHeader=req.headers['authorization'];
   const token=authHeader.split(' ')[1];

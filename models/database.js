@@ -1,8 +1,11 @@
+// Importing required modules
 const mongoose = require('mongoose');
 const crypto = require("crypto");
 mongoose.set('strictQuery', true);
 
+// Connecting to the MongoDB Atlas database
 const connection = "mongodb+srv://carmelbar:yb6calpzkTW88yQC@cluster1.2yfkirw.mongodb.net/Budget?retryWrites=true&w=majority";
+
 mongoose.connect(connection, { useNewUrlParser: true });
 const db = mongoose.connection;
 // Logging any errors that occur when connecting to the database.
@@ -14,6 +17,7 @@ db.once('open', () => {
     console.log('Successfully connected to MongoDB Atlas.');
 });
 
+// Enumerating budget categories
 enumCategory=[
     'food',
     'housing',
@@ -23,7 +27,7 @@ enumCategory=[
     'transportation',
     'other',]
 
-// Creating schemas
+// Creating a schema for users
 const usersSchema= new mongoose.Schema(
     {
         id:String,
@@ -33,6 +37,7 @@ const usersSchema= new mongoose.Schema(
     {versionKey: false}
 );
 
+// Creating a schema for budget entries
 const budgetSchema= new mongoose.Schema({
         user_id:{
             type:Number,
@@ -61,6 +66,7 @@ const budgetSchema= new mongoose.Schema({
     {versionKey: false}
 );
 
+// Creating User and Budget models using the defined schemas
 const User=mongoose.model('User',usersSchema);
 const Budget=mongoose.model('Budget',budgetSchema);
 
