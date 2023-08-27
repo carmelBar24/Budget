@@ -6,13 +6,13 @@ async function handleBudgetRequest(req, res) {
     // Retrieve budget data based on user ID and category if provided
     // Handle different cases for matching user ID and other errors
     // Return appropriate responses
-    if(req.user.id!=req.body.user_id)
-    {
-        return res.status(401).json("The provided ID does not correspond to the user.");
-    }
     let resultComputed;
     let q = req.url.split('?'), result = {};
     splitUrl(q,result);
+    if(req.user.id!=result.user_id)
+    {
+        return res.status(401).json("The provided ID does not correspond to the user.");
+    }
     try {
         if (result.category) {
             resultComputed = await Budget.find({user_id: result.user_id, category: result.category});
