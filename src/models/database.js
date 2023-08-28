@@ -1,12 +1,14 @@
 // Importing required modules
+require('dotenv').config()
 const mongoose = require('mongoose');
 const crypto = require("crypto");
 mongoose.set('strictQuery', true);
+const mongoDbUri = process.env.MONGO_DB_URI;
 
+console.log(mongoDbUri);
 // Connecting to the MongoDB Atlas database
-const connection = "mongodb+srv://carmelbar:yb6calpzkTW88yQC@cluster1.2yfkirw.mongodb.net/Budget?retryWrites=true&w=majority";
 
-mongoose.connect(connection, { useNewUrlParser: true });
+mongoose.connect(mongoDbUri, { useNewUrlParser: true });
 const db = mongoose.connection;
 // Logging any errors that occur when connecting to the database.
 db.on('error', (error) => {
@@ -30,7 +32,13 @@ enumCategory=[
 // Creating a schema for users
 const usersSchema= new mongoose.Schema(
     {
-        id:String,
+        id: {
+            type: String,
+            unique: true,
+            default: () => {
+                return crypto.randomUUID();
+            },
+        },
         username: String,
         password:String,
     },
@@ -40,7 +48,7 @@ const usersSchema= new mongoose.Schema(
 // Creating a schema for budget entries
 const budgetSchema= new mongoose.Schema({
         user_id:{
-            type:Number,
+            type:String,
             required:true,
         },
         description:{

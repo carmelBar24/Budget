@@ -1,4 +1,4 @@
-const { authenticateToken } = require('./middleware');
+const { authenticateToken } = require('./src/middlewares/middleware');
 
 describe('authenticateToken', () => {
     it('should send 401 if authHeader is undefined', () => {

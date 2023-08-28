@@ -8,42 +8,43 @@ var logger = require('morgan');
 
 
 // Import routes and database models
-var indexRouter = require('./routes/index');
-const { handleBudgetRequest,handleAddCostRequest,handleRemoveCostRequest,handleUpdateCostRequest,handleRegisterRequest,handleLoginRequest} = require('./budgetRoutes');
-const { authenticateToken } = require('./middleware');
+const loginRouter = require('./src/routes/login');
+const registerRouter = require('./src/routes/register');
+const updateCostRouter = require('./src/routes/updateCost');
+const budgetRouter = require('./src/routes/budget');
+const addCostRouter = require('./src/routes/addCost');
+const removeCostRouter = require('./src/routes/removeCost');
+const { authenticateToken } = require('./src/middlewares/middleware');
 
 var app = express();
 
 // Configure view engine and middleware
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
+app.use(express.json());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Use the index router
-app.use('/', indexRouter);
+// Use the login router
+app.use('/login',loginRouter)
 
-// Handle user login
-app.post('/login',handleLoginRequest)
+// Use the register router
+app.use('/register',registerRouter)
 
-// Handle user registration
-app.post('/register',handleRegisterRequest)
+// Use the budget router
+app.use('/budget',authenticateToken, budgetRouter)
 
-// Handle budget retrieval
-app.get('/budget',authenticateToken, handleBudgetRequest)
+// Use the addCost router
+app.use('/addCost',authenticateToken,addCostRouter)
 
-// Handle adding a cost entry
-app.post('/addCost',authenticateToken,handleAddCostRequest)
+// Use the removeCost router
+app.use('/removeCost',authenticateToken,removeCostRouter)
 
-// Handle removing a cost entry
-app.delete('/removeCost',authenticateToken,handleRemoveCostRequest )
-
-// Handle updating a cost entry
-app.post('/updateCost',authenticateToken,handleUpdateCostRequest)
+// Use the updateCost router
+app.use('/updateCost',authenticateToken,updateCostRouter)
 
 
 // Error handling for 404 and other errors
@@ -62,4 +63,8 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
 module.exports = app;

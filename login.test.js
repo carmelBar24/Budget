@@ -1,4 +1,4 @@
-const { handleLoginRequest } = require('./budgetRoutes');
+const { handleLoginRequest } = require('./src/routes/userRoutes');
 
 describe('handleLoginRequest', () => {
     it('should send 401 if user does not exist', async () => {
@@ -16,7 +16,7 @@ describe('handleLoginRequest', () => {
         await handleLoginRequest(req, res);
 
         expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith("Login failed. There seems to be an issue with the username or ID.");
+        expect(res.json).toHaveBeenCalledWith("Login failed. There seems to be an issue with the username");
     });
 
     // Add more test cases for other scenarios
