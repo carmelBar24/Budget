@@ -57,7 +57,7 @@ async function handleRemoveCostRequest(req,res)
                 throw Error("No cost found with the provided ID.");
             }
             else{
-                await Budget.find({id:req.body.cost_id}).remove();
+                await Budget.find({id:req.body.cost_id}).deleteOne();
             }
             console.log("Cost removed successfully for user ID:", req.user.id);
             res.json('Successfully deleted cost');
