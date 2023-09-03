@@ -18,7 +18,6 @@ Request Body:
 ```json
 {
     "username": "david",
-    "id": "1",
     "password": "123123"
 }
 ```
@@ -28,7 +27,6 @@ Request Body:
 ```json
 {
     "username": "david",
-    "id": "1",
     "password": "123123"
 }
 ```
@@ -45,7 +43,6 @@ Endpoint: POST /addCost
 Request Body:
 ```json
 {
-    "user_id": "1",
     "description": "see a movie",
     "category": "other",
     "sum": "5"
@@ -56,7 +53,6 @@ Endpoint: POST /updateCost
 Request Body:
 ```json
 {
-    "user_id": "1",
     "cost_id": "8d6caa28-830e-4d8f-be32-4eda01b6fc0a",
     "sum": "5"
 }
@@ -66,7 +62,6 @@ Endpoint: DELETE /removeCost
 Request Body:
 ```json
 {
-    "user_id": "3",
     "cost_id": "b83d64fe-a247-41a3-9b02-e89aad40f672"
 }
 ```
